@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>روشن دین - مکمل تلاوت و مطالعہِ قرآن</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Amiri:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1b4d3e;
+            --primary-dark: #123429;
+            --primary-light: #2c7a62;
+            --accent: #c5a059;
+            --bg-light: #f9f8f3;
+            --card-bg: #ffffff;
+            --text-dark: #222222;
+            --border-color: #e2dfd5;
+            --shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Noto Nastaliq Urdu', Tahoma, Arial, sans-serif; background-color: var(--bg-light); color: var(--text-dark); line-height: 2.2; }
+        body.lang-en { font-family: 'Inter', Tahoma, Arial, sans-serif; line-height: 1.7; }
+        body.lang-ar { font-family: 'Amiri', 'Noto Nastaliq Urdu', serif; }
+
+        /* Header */
+        header { background-color: var(--primary); color: white; padding: 15px 0; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .container { width: 92%; max-width: 1200px; margin: 0 auto; }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .logo { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: bold; color: var(--accent); text-decoration: none; }
+
+        .lang-switch { display:flex; gap:6px; background: rgba(255,255,255,0.1); padding:4px; border-radius:20px; }
+        .lang-switch button { background:transparent; border:none; color:#e0e0e0; padding:6px 14px; border-radius:16px; cursor:pointer; font-size:13px; font-family:'Inter',Tahoma,Arial,sans-serif; }
+        .lang-switch button.active { background: var(--accent); color:#111; font-weight:bold; }
+
+        /* Hero Banner */
+        .hero { background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%); color: white; padding: 35px 20px; text-align: center; border-bottom: 5px solid var(--accent); }
+        .hero h1 { font-size: 28px; color: var(--accent); margin-bottom: 8px; }
+        .hero p { font-size: 15px; color: #e0e0e0; }
+
+        /* Main Surah Card List */
+        .quran-card { background: #fffdf9; border: 1px solid #f0e6d2; border-inline-start: 5px solid var(--accent); border-radius: 12px; padding: 25px; margin: 30px auto; box-shadow: var(--shadow); }
+        .surah-search { width: 100%; padding: 12px 18px; font-size: 16px; border: 2px solid var(--border-color); border-radius: 8px; margin-bottom: 20px; font-family: inherit; outline: none; }
+        .surah-search:focus { border-color: var(--primary); }
+        .surah-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 15px; max-height: 500px; overflow-y: auto; padding-inline-end: 6px; }
+
+        .surah-item { background: var(--card-bg); border: 1px solid var(--border-color); padding: 12px 15px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: var(--text-dark); cursor: pointer; transition: 0.2s; }
+        .surah-item:hover { background-color: #f0f7f4; border-color: var(--primary-light); }
+        .surah-num { background: var(--primary); color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 13px; font-weight: bold; flex-shrink:0; }
+        .surah-name-wrap { display:flex; flex-direction:column; gap:2px; }
+        .surah-name { font-family: 'Amiri', serif; font-size: 18px; font-weight: bold; color: var(--primary); }
+        .surah-meta { font-size: 11px; color: #7a7a72; font-family: 'Inter',Tahoma, Arial, sans-serif; }
+        .loading-line { text-align:center; padding: 30px; color:#7a7a72; }
+
+        /* Reader Modal */
+        .reader-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; padding: 20px; overflow-y: auto; }
+        .reader-content { max-width: 950px; margin: 20px auto; background: #fdfaf3; color: #111; border-radius: 12px; padding: 25px; position: relative; border: 3px solid var(--accent); }
+        .close-btn { position: absolute; top: 15px; inset-inline-start: 15px; background: var(--primary); color: white; border: none; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-family: inherit; }
+
+        .audio-player-box { background: #eef7f3; border: 1px solid var(--primary-light); border-radius: 8px; padding: 15px; margin: 15px 0; }
+        .qari-select { width: 100%; padding: 8px; border-radius: 5px; border: 1px solid var(--primary); font-family: inherit; font-size: 14px; margin: 5px 0 10px 0; }
+
+        .reader-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px; justify-content: space-between; background: #f4edd9; padding: 10px 15px; border-radius: 8px; }
+        .ctrl-btn { background: var(--primary); color: white; border: none; padding: 6px 14px; border-radius: 5px; cursor: pointer; font-family: inherit; font-size: 13px; }
+        .ctrl-group { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+        .mode-switch { display:flex; background:#fff; border:1px solid var(--primary); border-radius:20px; overflow:hidden; font-size:13px; }
+        .mode-switch button { border:none; background:transparent; padding:7px 16px; cursor:pointer; font-family:inherit; color: var(--primary); }
+        .mode-switch button.active { background: var(--primary); color:#fff; font-weight:bold; }
+
+        .ayah-list { display:flex; flex-direction:column; gap:14px; margin-top:10px; }
+        .ayah-card { background:#fffdf7; border:1px solid #e6dcbe; border-radius:10px; padding:16px 18px; }
+        .ayah-card.playing { border-color: var(--primary-light); box-shadow: 0 0 0 2px rgba(44,122,98,0.25); }
+        .ayah-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px; }
+        .ayah-badge { background: var(--primary); color:#fff; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-family:'Inter',Tahoma,Arial,sans-serif; flex-shrink:0; }
+        .arabic-text-box, .ayah-text { font-family: 'Amiri', serif; font-size: 28px; line-height: 2.5; text-align: right; direction: rtl; }
+        .ayah-text { background:#fffdf7; padding:6px 0 14px; border-bottom: 1px dashed #e6dcbe; margin-bottom:12px; }
+        .ayah-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+        .mini-btn { background: var(--primary-light); color:#fff; border:none; padding:6px 12px; border-radius:5px; cursor:pointer; font-family:inherit; font-size:12.5px; display:inline-flex; align-items:center; gap:5px; }
+        .mini-btn.rec { background:#c14b3f; }
+        .mini-btn.rec.active { background:#8f2f26; }
+        .mini-btn.gold { background: var(--accent); color:#111; }
+        .own-rec-box { margin-top:10px; background:#fff5f5; border:1px dashed #d9534f; border-radius:8px; padding:10px 12px; display:none; align-items:center; gap:10px; flex-wrap:wrap; }
+        .own-rec-box audio { height:34px; }
+        .own-rec-box .status { font-size:12px; color:#c14b3f; font-weight:bold; }
+
+        .arabic-text-box { background: #fffdf7; padding: 25px; border-radius: 8px; border: 1px solid #e6dcbe; }
+
+        .full-surah-box { border-top: 1px dashed var(--border-color); margin-top: 18px; padding-top: 14px; }
+        .full-surah-box summary { cursor:pointer; font-weight:bold; color: var(--primary); font-family: 'Inter',Tahoma, Arial, sans-serif; font-size: 14px; }
+
+        .bismillah-box { text-align:center; background:#eef7f3; border:1px solid var(--primary-light); border-radius:8px; padding:14px; margin-bottom:14px; font-family:'Amiri', serif; color: var(--primary-dark); }
+
+        .my-recordings { margin-top: 22px; background:#f4edd9; border-radius:10px; padding:16px 18px; }
+        .my-recordings h4 { color: var(--primary); font-family: 'Inter',Tahoma, Arial, sans-serif; font-size:14px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+        .rec-row { display:flex; align-items:center; gap:10px; background:#fff; border-radius:8px; padding:8px 12px; margin-bottom:8px; flex-wrap:wrap; }
+        .rec-row .rec-label { font-family: 'Inter',Tahoma, Arial, sans-serif; font-size: 12.5px; color:#444; min-width:110px; }
+        .rec-row audio { height:32px; flex:1; min-width:160px; }
+        .rec-row .rec-btns { display:flex; gap:6px; }
+        .rec-empty { font-family: 'Inter',Tahoma, Arial, sans-serif; font-size:12.5px; color:#7a7a72; }
+
+        .fetch-error { text-align:center; padding:20px; color:#c14b3f; font-family: 'Inter',Tahoma, Arial, sans-serif; }
+
+        /* Deeniyat sections (Kalimas, Namaz, Ahadees) */
+        .deen-card { background: #fffdf9; border: 1px solid #f0e6d2; border-inline-start: 5px solid var(--primary); border-radius: 12px; padding: 25px; margin: 30px auto; box-shadow: var(--shadow); }
+        .deen-card h3 { color: var(--primary); margin-bottom: 6px; }
+        .deen-sub { font-size: 12.5px; color:#7a7a72; font-family:'Inter',Tahoma,Arial,sans-serif; margin-bottom: 18px; }
+        .kalima-item, .hadees-item { background:#fffdf7; border:1px solid #e6dcbe; border-radius:10px; padding:16px 18px; margin-bottom:14px; }
+        .kalima-item .item-title, .hadees-item .item-title { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+        .item-badge { background: var(--primary); color:#fff; padding:3px 12px; border-radius:14px; font-size:12.5px; font-family:'Inter',Tahoma,Arial,sans-serif; }
+        .item-name { font-weight:bold; color: var(--primary); font-family:'Inter',Tahoma,Arial,sans-serif; font-size: 14px; }
+        .arabic-line { font-family:'Amiri', serif; font-size:24px; line-height:2.2; text-align:right; direction:rtl; padding:8px 0; border-bottom:1px dashed #e6dcbe; margin-bottom:8px; }
+        .translation-line { font-size: 15px; color:#333; }
+        .namaz-steps { counter-reset: step; }
+        .namaz-step { background:#fffdf7; border:1px solid #e6dcbe; border-radius:10px; padding:14px 18px; margin-bottom:12px; position:relative; padding-inline-start:52px; }
+        .namaz-step::before { counter-increment: step; content: counter(step); position:absolute; inset-inline-start:14px; top:14px; background: var(--primary); color:#fff; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-family:'Inter',Tahoma,Arial,sans-serif; }
+        .namaz-step .step-title { font-weight:bold; color: var(--primary); margin-bottom:4px; }
+        .hadees-list { max-height: 650px; overflow-y:auto; padding-inline-end:6px; }
+
+        footer { background-color: var(--primary-dark); color: white; text-align: center; padding: 18px 0; margin-top: 40px; border-top: 4px solid var(--accent); }
+        .dev-contact { margin-top: 12px; display:flex; justify-content:center; gap:18px; flex-wrap:wrap; }
+        .dev-contact a { color: var(--accent); text-decoration:none; font-size: 14px; font-family:'Inter',Tahoma,Arial,sans-serif; display:inline-flex; align-items:center; gap:7px; }
+        .dev-contact a:hover { color: #fff; }
+        .dev-name { margin-top:8px; font-size:13px; color:#cfd8d3; font-family:'Inter',Tahoma,Arial,sans-serif; }
+
+        @media (max-width:560px){
+            .ayah-text, .arabic-text-box{ font-size: 22px; }
+            .reader-controls{ flex-direction:column; align-items:stretch; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container header-flex">
+            <a href="#" class="logo"><i class="fas fa-quran"></i> <span data-i18n="siteName">روشن دین</span></a>
+            <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+                <span data-i18n="siteTag" style="font-size: 13px; color: var(--accent);">تلاوتِ قرآن - سنیں، پڑھیں اور اپنی تلاوت ریکارڈ کریں</span>
+                <div class="lang-switch">
+                    <button id="langBtn_ur" onclick="setLang('ur')">اردو</button>
+                    <button id="langBtn_en" onclick="setLang('en')">English</button>
+                    <button id="langBtn_ar" onclick="setLang('ar')">العربية</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1 data-i18n="heroTitle">آن لائن قرآن تلاوت پورٹل</h1>
+            <p data-i18n="heroDesc">سورت منتخب کریں: قاری صاحب کی آواز میں سنیں، آیت بہ آیت خود تلاوت کریں، اور اپنی آواز ریکارڈ کر کے موازنہ کریں۔</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="quran-card">
+            <h3><i class="fas fa-list"></i> <span data-i18n="chooseSurah">سورت کا انتخاب کریں</span></h3>
+            <input type="text" id="surahInput" class="surah-search" onkeyup="filterSurahs()" data-i18n-placeholder="searchPlaceholder" placeholder="سورت کا نام یا نمبر تلاش کریں... (مثلاً: الفاتحة یا 1)">
+            <div class="surah-grid" id="surahContainer">
+                <div class="loading-line"><i class="fas fa-spinner fa-spin"></i> <span data-i18n="loadingSurahs">سورتوں کی فہرست لوڈ ہو رہی ہے...</span></div>
+            </div>
+        </div>
+
+        <!-- ============== چھ کلمے ============== -->
+        <div class="deen-card">
+            <h3><i class="fas fa-star-and-crescent"></i> چھ کلمے</h3>
+            <p class="deen-sub">حنفی مسلک کے مطابق روزمرہ پڑھے جانے والے چھ کلمے - عربی متن اور ترجمہ کے ساتھ</p>
+            <div id="kalimaList"></div>
+        </div>
+
+        <!-- ============== نماز کا طریقہ (احناف) ============== -->
+        <div class="deen-card">
+            <h3><i class="fas fa-mosque"></i> نماز کا طریقہ (فقہ حنفی کے مطابق)</h3>
+            <p class="deen-sub">مختصر اور آسان انداز میں نماز ادا کرنے کا طریقہ</p>
+            <div class="namaz-steps" id="namazSteps"></div>
+        </div>
+
+        <!-- ============== 40 احادیث ============== -->
+        <div class="deen-card">
+            <h3><i class="fas fa-book"></i> چالیس (40) احادیث</h3>
+            <p class="deen-sub">منتخب احادیثِ نبویﷺ - عربی متن اور اردو مفہوم کے ساتھ</p>
+            <div class="hadees-list" id="hadeesList"></div>
+        </div>
+    </div>
+
+    <div id="quranModal" class="reader-modal">
+        <div class="reader-content">
+            <button class="close-btn" onclick="closePortal()"><i class="fas fa-times"></i> <span data-i18n="close">بند کریں</span></button>
+
+            <h2 id="modalSurahTitle" style="color: var(--primary); text-align: center; margin-bottom: 5px;">سورة الفاتحة</h2>
+            <p id="modalSurahMeta" style="text-align:center; font-size:12.5px; color:#7a7a72; font-family:'Inter',Tahoma,Arial,sans-serif; margin-bottom:10px;"></p>
+
+            <div class="reader-controls">
+                <div class="mode-switch">
+                    <button id="modeAyahBtn" class="active" onclick="setViewMode('ayah')"><i class="fas fa-list-ol"></i> <span data-i18n="modeAyah">آیت بہ آیت (خود تلاوت)</span></button>
+                    <button id="modeFullBtn" onclick="setViewMode('full')"><i class="fas fa-book-open"></i> <span data-i18n="modeFull">مکمل متن</span></button>
+                </div>
+                <div class="ctrl-group">
+                    <button class="ctrl-btn" onclick="zoomFont(3)"><i class="fas fa-plus"></i> <span data-i18n="bigger">بڑا</span></button>
+                    <button class="ctrl-btn" onclick="zoomFont(-3)"><i class="fas fa-minus"></i> <span data-i18n="smaller">چھوٹا</span></button>
+                </div>
+            </div>
+
+            <div class="audio-player-box">
+                <label style="font-weight: bold; color: var(--primary);"><i class="fas fa-volume-up"></i> <span data-i18n="chooseReciter">پوری سورت سننے کے لیے قاری صاحب کا انتخاب کریں:</span></label>
+                <select id="qariSelect" class="qari-select" onchange="loadFullAudio()">
+                    <option value="https://server8.mp3quran.net/basit/Almusshaf-Almojawwad/" data-i18n="reciter1">قاری عبد الباسط عبد الصمد</option>
+                    <option value="https://server11.mp3quran.net/afs/" data-i18n="reciter2">قاری مشاری بن راشد العفاسی</option>
+                    <option value="https://server13.mp3quran.net/hussary/" data-i18n="reciter3">قاری محمود خلیل الحصری</option>
+                </select>
+                <audio id="fullAudioPlayer" controls style="width: 100%;"></audio>
+            </div>
+
+            <div id="bismillahBox" class="bismillah-box" style="display:none;"></div>
+
+            <div id="ayahLoading" class="loading-line" style="display:none;"><i class="fas fa-spinner fa-spin"></i> <span data-i18n="loadingAyahs">آیات لوڈ ہو رہی ہیں...</span></div>
+            <div id="ayahError" class="fetch-error" style="display:none;"></div>
+
+            <div id="ayahListView">
+                <div class="ayah-list" id="ayahList"></div>
+            </div>
+
+            <details class="full-surah-box" id="fullTextView" style="display:none;" open>
+                <summary><i class="fas fa-book-open"></i> <span data-i18n="fullTextSummary">مکمل سورت کا متن</span></summary>
+                <div class="arabic-text-box" id="arabicTextBox" style="margin-top:12px;"></div>
+            </details>
+
+            <div class="my-recordings">
+                <h4>
+                    <span><i class="fas fa-headphones-simple"></i> <span data-i18n="myRecordings">میری تلاوتیں (اسی سورت کی)</span></span>
+                    <button class="mini-btn" onclick="clearAllRecordings()"><i class="fas fa-trash"></i> <span data-i18n="clearAll">سب صاف کریں</span></button>
+                </h4>
+                <div id="myRecordingsList"><div class="rec-empty" data-i18n="noRecordings">ابھی کوئی ریکارڈنگ نہیں کی گئی۔ نیچے کسی بھی آیت کے ساتھ "ریکارڈ کریں" دبائیں۔</div></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p data-i18n="footerText">روشن دین - آن لائن تلاوتِ قرآن پورٹل</p>
+            <p class="dev-name">تیار کردہ / Developed by: عمر راہی (Umar Rahi)</p>
+            <div class="dev-contact">
+                <a href="mailto:umarrahidrk@gmail.com"><i class="fas fa-envelope"></i> umarrahidrk@gmail.com</a>
+                <a href="https://wa.me/923497879859" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> 03497879859</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const SURAH_LIST_API = 'https://api.alquran.cloud/v1/surah';
+        const SURAH_TEXT_API = (num) => `https://api.alquran.cloud/v1/surah/${num}/quran-uthmani`;
+        const AYAH_AUDIO_URL = (globalAyahNum) => `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${globalAyahNum}.mp3`;
+        const BISMILLAH_TEXT = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
+
+        let currentSurah = 1;
+        let currentSurahMetaCache = null;
+        let currentAyahs = [];
+        let fontSize = 28;
+        let viewMode = 'ayah';
+        let currentLang = 'ur';
+
+        let ayahAudio = new Audio();
+        let currentlyPlayingBtn = null;
+        let activeRecorder = null;
+        let activeRecordBtn = null;
+        const recordings = {};
+
+        // ---------------- i18n ----------------
+        const translations = {
+            ur: {
+                siteName: 'روشن دین',
+                siteTag: 'تلاوتِ قرآن - سنیں، پڑھیں اور اپنی تلاوت ریکارڈ کریں',
+                heroTitle: 'آن لائن قرآن تلاوت پورٹل',
+                heroDesc: 'سورت منتخب کریں: قاری صاحب کی آواز میں سنیں، آیت بہ آیت خود تلاوت کریں، اور اپنی آواز ریکارڈ کر کے موازنہ کریں۔',
+                chooseSurah: 'سورت کا انتخاب کریں',
+                searchPlaceholder: 'سورت کا نام یا نمبر تلاش کریں... (مثلاً: الفاتحة یا 1)',
+                loadingSurahs: 'سورتوں کی فہرست لوڈ ہو رہی ہے...',
+                errorSurahs: 'سورتوں کی فہرست لوڈ نہیں ہو سکی۔ انٹرنیٹ کنکشن چیک کریں اور صفحہ ری لوڈ کریں۔',
+                close: 'بند کریں',
+                modeAyah: 'آیت بہ آیت (خود تلاوت)',
+                modeFull: 'مکمل متن',
+                bigger: 'بڑا',
+                smaller: 'چھوٹا',
+                chooseReciter: 'پوری سورت سننے کے لیے قاری صاحب کا انتخاب کریں:',
+                reciter1: 'قاری عبد الباسط عبد الصمد',
+                reciter2: 'قاری مشاری بن راشد العفاسی',
+                reciter3: 'قاری محمود خلیل الحصری',
+                loadingAyahs: 'آیات لوڈ ہو رہی ہیں...',
+                errorAyahs: 'آیات لوڈ نہیں ہو سکیں۔ انٹرنیٹ کنکشن چیک کر کے دوبارہ کوشش کریں۔',
+                fullTextSummary: 'مکمل سورت کا متن',
+                myRecordings: 'میری تلاوتیں (اسی سورت کی)',
+                clearAll: 'سب صاف کریں',
+                noRecordings: 'ابھی کوئی ریکارڈنگ نہیں کی گئی۔ نیچے کسی بھی آیت کے ساتھ "ریکارڈ کریں" دبائیں۔',
+                footerText: 'روشن دین - آن لائن تلاوتِ قرآن پورٹل',
+                listen: 'سنیں', pause: 'رکیں',
+                recordBtn: 'اپنی تلاوت ریکارڈ کریں', stopBtn: 'روکیں', reRecordBtn: 'دوبارہ ریکارڈ کریں',
+                yourRecitationOf: 'کی آپ کی تلاوت:', download: 'ڈاؤن لوڈ',
+                recordingInProgress: '🔴 ریکارڈ ہو رہا ہے... جب تلاوت مکمل ہو جائے تو "روکیں" دبائیں',
+                micDenied: 'مائیک کی اجازت نہیں ملی۔ براہِ کرم براؤزر کی سیٹنگز میں مائیک کی اجازت دیں۔',
+                otherRecording: 'پہلے سے ایک ریکارڈنگ جاری ہے، پہلے اسے روکیں۔',
+                confirmClearAll: 'کیا آپ اس سورت کی تمام ریکارڈنگز حذف کرنا چاہتے ہیں؟',
+                ayahLabel: 'آیت نمبر',
+                meccan: 'مکی', medinan: 'مدنی', ayahsWord: 'آیات'
+            },
+            en: {
+                siteName: 'Roshan Deen',
+                siteTag: 'Quran Recitation - Listen, Read & Record Your Own Recitation',
+                heroTitle: 'Online Quran Recitation Portal',
+                heroDesc: 'Choose a surah: listen to a reciter, recite ayah-by-ayah yourself, and record your own voice to compare.',
+                chooseSurah: 'Choose a Surah',
+                searchPlaceholder: 'Search surah by name or number... (e.g. Al-Fatiha or 1)',
+                loadingSurahs: 'Loading surah list...',
+                errorSurahs: 'Could not load the surah list. Check your internet connection and reload the page.',
+                close: 'Close',
+                modeAyah: 'Ayah-by-Ayah (Self Recite)',
+                modeFull: 'Full Text',
+                bigger: 'Bigger',
+                smaller: 'Smaller',
+                chooseReciter: 'Choose a reciter to listen to the full surah:',
+                reciter1: 'Qari Abdul Basit Abdus Samad',
+                reciter2: 'Qari Mishary Rashid Alafasy',
+                reciter3: 'Qari Mahmoud Khalil Al-Hussary',
+                loadingAyahs: 'Loading verses...',
+                errorAyahs: 'Could not load the verses. Check your internet connection and try again.',
+                fullTextSummary: 'Full Surah Text',
+                myRecordings: 'My Recitations (this surah)',
+                clearAll: 'Clear All',
+                noRecordings: 'No recordings yet. Press "Record" next to any verse below.',
+                footerText: 'Roshan Deen - Online Quran Recitation Portal',
+                listen: 'Listen', pause: 'Pause',
+                recordBtn: 'Record Your Recitation', stopBtn: 'Stop', reRecordBtn: 'Re-record',
+                yourRecitationOf: '- your recitation:', download: 'Download',
+                recordingInProgress: '🔴 Recording... press "Stop" when you finish the verse',
+                micDenied: 'Microphone access was denied. Please allow microphone access in your browser settings.',
+                otherRecording: 'A recording is already in progress. Please stop it first.',
+                confirmClearAll: 'Delete all recordings for this surah?',
+                ayahLabel: 'Verse',
+                meccan: 'Meccan', medinan: 'Medinan', ayahsWord: 'verses'
+            },
+            ar: {
+                siteName: 'روشن دین',
+                siteTag: 'تلاوة القرآن - استمع واقرأ وسجّل تلاوتك',
+                heroTitle: 'بوابة تلاوة القرآن الكريم',
+                heroDesc: 'اختر سورة: استمع إلى القارئ، ورتّل آية آية بنفسك، وسجّل صوتك للمقارنة.',
+                chooseSurah: 'اختر السورة',
+                searchPlaceholder: 'ابحث عن السورة بالاسم أو الرقم... (مثال: الفاتحة أو 1)',
+                loadingSurahs: 'جاري تحميل قائمة السور...',
+                errorSurahs: 'تعذر تحميل قائمة السور. تحقق من اتصال الإنترنت وأعد تحميل الصفحة.',
+                close: 'إغلاق',
+                modeAyah: 'آية بآية (تلاوة ذاتية)',
+                modeFull: 'النص الكامل',
+                bigger: 'أكبر',
+                smaller: 'أصغر',
+                chooseReciter: 'اختر قارئًا للاستماع إلى السورة كاملة:',
+                reciter1: 'القارئ عبد الباسط عبد الصمد',
+                reciter2: 'القارئ مشاري بن راشد العفاسي',
+                reciter3: 'القارئ محمود خليل الحصري',
+                loadingAyahs: 'جاري تحميل الآيات...',
+                errorAyahs: 'تعذر تحميل الآيات. تحقق من الاتصال وأعد المحاولة.',
+                fullTextSummary: 'نص السورة كاملاً',
+                myRecordings: 'تلاواتي (لهذه السورة)',
+                clearAll: 'حذف الكل',
+                noRecordings: 'لا توجد تسجيلات بعد. اضغط "تسجيل" بجانب أي آية أدناه.',
+                footerText: 'روشن دین - بوابة تلاوة القرآن الكريم',
+                listen: 'استمع', pause: 'إيقاف',
+                recordBtn: 'سجّل تلاوتك', stopBtn: 'إيقاف', reRecordBtn: 'إعادة التسجيل',
+                yourRecitationOf: '- تلاوتك:', download: 'تنزيل',
+                recordingInProgress: '🔴 جاري التسجيل... اضغط "إيقاف" عند الانتهاء من الآية',
+                micDenied: 'تم رفض إذن الميكروفون. يرجى السماح بالوصول إلى الميكروفون من إعدادات المتصفح.',
+                otherRecording: 'يوجد تسجيل قيد التنفيذ بالفعل. يرجى إيقافه أولاً.',
+                confirmClearAll: 'هل تريد حذف جميع تسجيلات هذه السورة؟',
+                ayahLabel: 'آية رقم',
+                meccan: 'مكية', medinan: 'مدنية', ayahsWord: 'آيات'
+            }
+        };
+
+        function t(key) { return (translations[currentLang] && translations[currentLang][key]) || translations.ur[key] || key; }
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.documentElement.dir = (lang === 'en') ? 'ltr' : 'rtl';
+            document.body.className = 'lang-' + lang;
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                el.textContent = t(el.getAttribute('data-i18n'));
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+            });
+
+            document.querySelectorAll('.lang-switch button').forEach(b => b.classList.remove('active'));
+            document.getElementById('langBtn_' + lang).classList.add('active');
+
+            if (currentSurahMetaCache) {
+                document.getElementById('modalSurahMeta').innerText =
+                    `${currentSurahMetaCache.englishName} • ${currentSurahMetaCache.numberOfAyahs} ${t('ayahsWord')} • ${currentSurahMetaCache.revelationType === 'Meccan' ? t('meccan') : t('medinan')}`;
+            }
+
+            refreshDynamicLabels();
+            renderMyRecordings();
+        }
+
+        function refreshDynamicLabels() {
+            document.querySelectorAll('.ayah-card').forEach(card => {
+                const localNum = card.id.replace('ayahCard_', '');
+                const listenBtn = card.querySelector('.mini-btn:not(.rec)');
+                if (listenBtn) {
+                    const isPlaying = listenBtn.innerHTML.includes('fa-pause');
+                    listenBtn.innerHTML = `<i class="fas fa-${isPlaying ? 'pause' : 'play'}"></i> ${isPlaying ? t('pause') : t('listen')}`;
+                }
+                const recBtn = document.getElementById('recBtn_' + localNum);
+                if (recBtn) {
+                    if (recBtn.classList.contains('active')) {
+                        recBtn.innerHTML = `<i class="fas fa-stop"></i> ${t('stopBtn')}`;
+                    } else if (recordings[currentSurah] && recordings[currentSurah].some(r => r.ayahNum == localNum)) {
+                        recBtn.innerHTML = `<i class="fas fa-microphone"></i> ${t('reRecordBtn')}`;
+                    } else {
+                        recBtn.innerHTML = `<i class="fas fa-microphone"></i> ${t('recordBtn')}`;
+                    }
+                }
+                const statusEl = card.querySelector('.own-rec-box .status');
+                if (statusEl && statusEl.innerText.includes('🔴')) {
+                    statusEl.innerText = t('recordingInProgress');
+                }
+            });
+        }
+
+        // ---------------- Surah List ----------------
+        async function loadSurahList() {
+            const container = document.getElementById('surahContainer');
+            try {
+                const res = await fetch(SURAH_LIST_API);
+                const data = await res.json();
+                const surahs = data.data;
+                container.innerHTML = '';
+                surahs.forEach(s => {
+                    const div = document.createElement('div');
+                    div.className = 'surah-item';
+                    div.onclick = () => openCombinedPortal(s.number, s.name, s.englishName, s.numberOfAyahs, s.revelationType);
+                    div.innerHTML = `
+                        <div class="surah-name-wrap">
+                            <span class="surah-name">${s.name}</span>
+                            <span class="surah-meta">${s.englishName} • ${s.numberOfAyahs}</span>
+                        </div>
+                        <span class="surah-num">${s.number}</span>`;
+                    div.dataset.search = (s.name + ' ' + s.englishName + ' ' + s.number).toLowerCase();
+                    container.appendChild(div);
+                });
+            } catch (err) {
+                container.innerHTML = `<div class="fetch-error">${t('errorSurahs')}</div>`;
+            }
+        }
+
+        function filterSurahs() {
+            const val = document.getElementById('surahInput').value.toLowerCase().trim();
+            const items = document.getElementsByClassName('surah-item');
+            for (let i = 0; i < items.length; i++) {
+                const hay = items[i].dataset.search || items[i].innerText.toLowerCase();
+                items[i].style.display = hay.indexOf(val) > -1 ? "flex" : "none";
+            }
+        }
+
+        // ---------------- Open Portal ----------------
+        async function openCombinedPortal(surahNum, surahName, englishName, ayahCount, revType) {
+            currentSurah = surahNum;
+            currentSurahMetaCache = { englishName, numberOfAyahs: ayahCount, revelationType: revType };
+            document.getElementById('modalSurahTitle').innerText = surahName || ('Surah ' + surahNum);
+            document.getElementById('modalSurahMeta').innerText = englishName ? `${englishName} • ${ayahCount} ${t('ayahsWord')} • ${revType === 'Meccan' ? t('meccan') : t('medinan')}` : '';
+            document.getElementById('quranModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+
+            loadFullAudio();
+            renderMyRecordings();
+            setViewMode('ayah');
+            await loadAyahText(surahNum);
+        }
+
+        async function loadAyahText(surahNum) {
+            const listEl = document.getElementById('ayahList');
+            const fullBox = document.getElementById('arabicTextBox');
+            const loadingEl = document.getElementById('ayahLoading');
+            const errorEl = document.getElementById('ayahError');
+            const bismillahBox = document.getElementById('bismillahBox');
+
+            listEl.innerHTML = '';
+            fullBox.innerHTML = '';
+            errorEl.style.display = 'none';
+            loadingEl.style.display = 'block';
+            bismillahBox.style.display = 'none';
+            bismillahBox.innerText = '';
+
+            try {
+                const res = await fetch(SURAH_TEXT_API(surahNum));
+                const data = await res.json();
+                currentAyahs = data.data.ayahs;
+                loadingEl.style.display = 'none';
+
+                // فقہ حنفی کے مطابق: سورۃ التوبہ (نمبر 9) کے سوا ہر سورت کے آغاز میں بسم اللہ
+                // الگ سے دکھائی جاتی ہے۔ سورۃ الفاتحہ میں بسم اللہ خود پہلی آیت ہے، اس لیے
+                // اسے آیت نمبر 1 میں ہی رہنے دیا جاتا ہے۔ باقی سورتوں میں API کی طرف سے
+                // پہلی آیت کے متن کے ساتھ جڑی ہوئی بسم اللہ کو الگ کر کے اوپر دکھایا جاتا ہے
+                // تاکہ آیات کی گنتی اور تلاوت بغیر کسی اختلاط کے واضح رہے۔
+                if (surahNum !== 9) {
+                    if (surahNum === 1) {
+                        bismillahBox.innerText = BISMILLAH_TEXT;
+                        bismillahBox.style.display = 'block';
+                    } else if (currentAyahs.length > 0 && currentAyahs[0].text.indexOf(BISMILLAH_TEXT) === 0) {
+                        bismillahBox.innerText = BISMILLAH_TEXT;
+                        bismillahBox.style.display = 'block';
+                        currentAyahs[0] = Object.assign({}, currentAyahs[0], {
+                            text: currentAyahs[0].text.replace(BISMILLAH_TEXT, '').trim()
+                        });
+                    }
+                }
+
+                let fullTextParts = [];
+                if (bismillahBox.style.display === 'block' && surahNum !== 1) {
+                    fullTextParts.push(BISMILLAH_TEXT);
+                }
+                currentAyahs.forEach(ayah => {
+                    fullTextParts.push(`${ayah.text} ﴿${ayah.numberInSurah}﴾`);
+
+                    const card = document.createElement('div');
+                    card.className = 'ayah-card';
+                    card.id = 'ayahCard_' + ayah.numberInSurah;
+                    card.innerHTML = `
+                        <div class="ayah-head">
+                            <span class="ayah-badge">${ayah.numberInSurah}</span>
+                            <div class="ayah-actions">
+                                <button class="mini-btn" onclick="playAyah(${ayah.number}, ${ayah.numberInSurah}, this)"><i class="fas fa-play"></i> ${t('listen')}</button>
+                                <button class="mini-btn rec" id="recBtn_${ayah.numberInSurah}" onclick="toggleAyahRecord(${ayah.numberInSurah}, this)"><i class="fas fa-microphone"></i> ${t('recordBtn')}</button>
+                            </div>
+                        </div>
+                        <div class="ayah-text" style="font-size:${fontSize}px;">${ayah.text} ﴿${ayah.numberInSurah}﴾</div>
+                        <div class="own-rec-box" id="ownRecBox_${ayah.numberInSurah}">
+                            <span class="status" id="ownRecStatus_${ayah.numberInSurah}"></span>
+                        </div>
+                    `;
+                    listEl.appendChild(card);
+                });
+
+                fullBox.innerText = fullTextParts.join(' ');
+                fullBox.style.fontSize = fontSize + 'px';
+            } catch (err) {
+                loadingEl.style.display = 'none';
+                errorEl.style.display = 'block';
+                errorEl.innerText = t('errorAyahs');
+            }
+        }
+
+        function setViewMode(mode) {
+            viewMode = mode;
+            document.getElementById('modeAyahBtn').classList.toggle('active', mode === 'ayah');
+            document.getElementById('modeFullBtn').classList.toggle('active', mode === 'full');
+            document.getElementById('ayahListView').style.display = mode === 'ayah' ? 'block' : 'none';
+            document.getElementById('fullTextView').style.display = mode === 'full' ? 'block' : 'none';
+        }
+
+        function loadFullAudio() {
+            const baseUrl = document.getElementById('qariSelect').value;
+            const surahFormatted = String(currentSurah).padStart(3, '0');
+            const player = document.getElementById('fullAudioPlayer');
+            player.pause();
+            player.src = `${baseUrl}${surahFormatted}.mp3`;
+        }
+
+        function playAyah(globalAyahNum, localNum, btn) {
+            document.getElementById('fullAudioPlayer').pause();
+            document.querySelectorAll('.ayah-card.playing').forEach(c => c.classList.remove('playing'));
+
+            if (currentlyPlayingBtn === btn && !ayahAudio.paused) {
+                ayahAudio.pause();
+                btn.innerHTML = `<i class="fas fa-play"></i> ${t('listen')}`;
+                currentlyPlayingBtn = null;
+                return;
+            }
+            if (currentlyPlayingBtn) {
+                currentlyPlayingBtn.innerHTML = `<i class="fas fa-play"></i> ${t('listen')}`;
+            }
+
+            ayahAudio.src = AYAH_AUDIO_URL(globalAyahNum);
+            ayahAudio.play();
+            btn.innerHTML = `<i class="fas fa-pause"></i> ${t('pause')}`;
+            currentlyPlayingBtn = btn;
+            document.getElementById('ayahCard_' + localNum).classList.add('playing');
+
+            ayahAudio.onended = () => {
+                btn.innerHTML = `<i class="fas fa-play"></i> ${t('listen')}`;
+                currentlyPlayingBtn = null;
+                document.getElementById('ayahCard_' + localNum).classList.remove('playing');
+            };
+        }
+
+        function zoomFont(change) {
+            fontSize = Math.max(16, Math.min(48, fontSize + change));
+            document.querySelectorAll('.ayah-text').forEach(el => el.style.fontSize = fontSize + 'px');
+            const fullBox = document.getElementById('arabicTextBox');
+            if (fullBox) fullBox.style.fontSize = fontSize + 'px';
+        }
+
+        function closePortal() {
+            document.getElementById('quranModal').style.display = 'none';
+            document.body.style.overflow = '';
+            document.getElementById('fullAudioPlayer').pause();
+            ayahAudio.pause();
+            if (activeRecorder && activeRecorder.state === 'recording') {
+                activeRecorder.stop();
+            }
+        }
+
+        async function toggleAyahRecord(localNum, btn) {
+            const boxEl = document.getElementById('ownRecBox_' + localNum);
+
+            if (activeRecorder && activeRecorder.state === 'recording' && activeRecordBtn === btn) {
+                activeRecorder.stop();
+                return;
+            }
+            if (activeRecorder && activeRecorder.state === 'recording') {
+                alert(t('otherRecording'));
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const chunks = [];
+                const recorder = new MediaRecorder(stream);
+                activeRecorder = recorder;
+                activeRecordBtn = btn;
+
+                recorder.ondataavailable = e => chunks.push(e.data);
+                recorder.onstop = () => {
+                    stream.getTracks().forEach(tr => tr.stop());
+                    const blob = new Blob(chunks, { type: 'audio/webm' });
+                    const url = URL.createObjectURL(blob);
+
+                    boxEl.style.display = 'flex';
+                    boxEl.innerHTML = `
+                        <span class="status">${t('ayahLabel')} ${localNum} ${t('yourRecitationOf')}</span>
+                        <audio controls src="${url}"></audio>
+                        <button class="mini-btn gold" onclick="downloadRecording('${url}', ${currentSurah}, ${localNum})"><i class="fas fa-download"></i> ${t('download')}</button>
+                    `;
+
+                    if (!recordings[currentSurah]) recordings[currentSurah] = [];
+                    recordings[currentSurah] = recordings[currentSurah].filter(r => r.ayahNum !== localNum);
+                    recordings[currentSurah].push({ ayahNum: localNum, url });
+                    renderMyRecordings();
+
+                    btn.innerHTML = `<i class="fas fa-microphone"></i> ${t('reRecordBtn')}`;
+                    btn.classList.remove('active');
+                    activeRecorder = null;
+                    activeRecordBtn = null;
+                };
+
+                recorder.start();
+                btn.innerHTML = `<i class="fas fa-stop"></i> ${t('stopBtn')}`;
+                btn.classList.add('active');
+                boxEl.style.display = 'flex';
+                boxEl.innerHTML = `<span class="status" id="ownRecStatus_${localNum}">${t('recordingInProgress')}</span>`;
+            } catch (err) {
+                alert(t('micDenied'));
+            }
+        }
+
+        function downloadRecording(url, surahNum, ayahNum) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `meri-tilawat-surah${surahNum}-ayah${ayahNum}.webm`;
+            a.click();
+        }
+
+        function renderMyRecordings() {
+            const listEl = document.getElementById('myRecordingsList');
+            const list = recordings[currentSurah] || [];
+            if (list.length === 0) {
+                listEl.innerHTML = `<div class="rec-empty">${t('noRecordings')}</div>`;
+                return;
+            }
+            listEl.innerHTML = '';
+            list.sort((a, b) => a.ayahNum - b.ayahNum).forEach(r => {
+                const row = document.createElement('div');
+                row.className = 'rec-row';
+                row.innerHTML = `
+                    <span class="rec-label">${t('ayahLabel')} ${r.ayahNum}</span>
+                    <audio controls src="${r.url}"></audio>
+                    <div class="rec-btns">
+                        <button class="mini-btn gold" onclick="downloadRecording('${r.url}', ${currentSurah}, ${r.ayahNum})"><i class="fas fa-download"></i></button>
+                        <button class="mini-btn" onclick="removeRecording(${r.ayahNum})"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                listEl.appendChild(row);
+            });
+        }
+
+        function removeRecording(ayahNum) {
+            if (!recordings[currentSurah]) return;
+            recordings[currentSurah] = recordings[currentSurah].filter(r => r.ayahNum !== ayahNum);
+            renderMyRecordings();
+            const boxEl = document.getElementById('ownRecBox_' + ayahNum);
+            const btn = document.getElementById('recBtn_' + ayahNum);
+            if (boxEl) { boxEl.style.display = 'none'; boxEl.innerHTML = ''; }
+            if (btn) { btn.innerHTML = `<i class="fas fa-microphone"></i> ${t('recordBtn')}`; }
+        }
+
+        function clearAllRecordings() {
+            if (!recordings[currentSurah] || recordings[currentSurah].length === 0) return;
+            if (!confirm(t('confirmClearAll'))) return;
+            recordings[currentSurah] = [];
+            renderMyRecordings();
+            document.querySelectorAll('.own-rec-box').forEach(b => { b.style.display = 'none'; b.innerHTML = ''; });
+            document.querySelectorAll('[id^="recBtn_"]').forEach(b => b.innerHTML = `<i class="fas fa-microphone"></i> ${t('recordBtn')}`);
+        }
+
+        // ---------------- چھ کلمے ----------------
+        const kalimas = [
+            {
+                name: 'پہلا کلمہ - کلمہ طیبہ',
+                arabic: 'لَا إِلَٰهَ إِلَّا اللَّهُ مُحَمَّدٌ رَسُولُ اللَّهِ',
+                translation: 'اللہ کے سوا کوئی معبود نہیں، محمدﷺ اللہ کے رسول ہیں۔'
+            },
+            {
+                name: 'دوسرا کلمہ - کلمہ شہادت',
+                arabic: 'أَشْهَدُ أَنْ لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ',
+                translation: 'میں گواہی دیتا ہوں کہ اللہ کے سوا کوئی معبود نہیں، وہ اکیلا ہے، اس کا کوئی شریک نہیں، اور میں گواہی دیتا ہوں کہ محمدﷺ اس کے بندے اور رسول ہیں۔'
+            },
+            {
+                name: 'تیسرا کلمہ - کلمہ تمجید',
+                arabic: 'سُبْحَانَ اللَّهِ وَالْحَمْدُ لِلَّهِ وَلَا إِلَٰهَ إِلَّا اللَّهُ وَاللَّهُ أَكْبَرُ وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ الْعَلِيِّ الْعَظِيمِ',
+                translation: 'اللہ پاک ہے، تمام تعریفیں اللہ کے لیے ہیں، اللہ کے سوا کوئی معبود نہیں، اللہ سب سے بڑا ہے، اور کسی کو گناہ سے بچنے اور نیکی کرنے کی طاقت اللہ ہی کی مدد سے ملتی ہے جو بلند و برتر اور عظمت والا ہے۔'
+            },
+            {
+                name: 'چوتھا کلمہ - کلمہ توحید',
+                arabic: 'لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ يُحْيِي وَيُمِيتُ وَهُوَ حَيٌّ لَا يَمُوتُ أَبَدًا أَبَدًا، ذُو الْجَلَالِ وَالْإِكْرَامِ، بِيَدِهِ الْخَيْرُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ',
+                translation: 'اللہ کے سوا کوئی معبود نہیں، وہ اکیلا ہے، اس کا کوئی شریک نہیں، بادشاہت اسی کی ہے اور تمام تعریفیں اسی کے لیے ہیں، وہی زندگی اور موت دیتا ہے، وہ ہمیشہ زندہ رہنے والا ہے کبھی نہیں مرے گا، وہ بزرگی اور عزت والا ہے، بھلائی اسی کے ہاتھ میں ہے اور وہ ہر چیز پر قادر ہے۔'
+            },
+            {
+                name: 'پانچواں کلمہ - کلمہ استغفار',
+                arabic: 'أَسْتَغْفِرُ اللَّهَ رَبِّي مِنْ كُلِّ ذَنْبٍ أَذْنَبْتُهُ عَمْدًا أَوْ خَطَأً سِرًّا أَوْ عَلَانِيَةً وَأَتُوبُ إِلَيْهِ مِنَ الذَّنْبِ الَّذِي أَعْلَمُ وَمِنَ الذَّنْبِ الَّذِي لَا أَعْلَمُ إِنَّكَ أَنْتَ عَلَّامُ الْغُيُوبِ وَسَتَّارُ الْعُيُوبِ وَغَفَّارُ الذُّنُوبِ وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ الْعَلِيِّ الْعَظِيمِ',
+                translation: 'میں اپنے رب اللہ سے ہر اس گناہ کی معافی چاہتا ہوں جو مجھ سے جان بوجھ کر یا انجانے میں، چھپ کر یا کھلے عام ہوا، اور اس گناہ سے بھی توبہ کرتا ہوں جو مجھے معلوم ہے اور اس سے بھی جو مجھے معلوم نہیں، بے شک تو ہی غیب کی باتوں کا جاننے والا، عیبوں کو چھپانے والا اور گناہوں کو معاف کرنے والا ہے، اور کسی کو گناہ سے بچنے کی طاقت اللہ ہی کی مدد سے ملتی ہے۔'
+            },
+            {
+                name: 'چھٹا کلمہ - کلمہ رد کفر',
+                arabic: 'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ أَنْ أُشْرِكَ بِكَ شَيْئًا وَأَنَا أَعْلَمُ بِهِ، وَأَسْتَغْفِرُكَ لِمَا لَا أَعْلَمُ بِهِ، تُبْتُ عَنْهُ وَتَبَرَّأْتُ مِنَ الْكُفْرِ وَالشِّرْكِ وَالْكِذْبِ وَالْغِيبَةِ وَالْبِدْعَةِ وَالنَّمِيمَةِ وَالْفَوَاحِشِ وَالْبُهْتَانِ وَالْمَعَاصِي كُلِّهَا، وَأَسْلَمْتُ وَأَقُولُ لَا إِلَٰهَ إِلَّا اللَّهُ مُحَمَّدٌ رَسُولُ اللَّهِ',
+                translation: 'اے اللہ! میں اس بات سے تیری پناہ چاہتا ہوں کہ جانتے بوجھتے تیرے ساتھ کسی کو شریک ٹھہراؤں، اور جو میں نہیں جانتا اس کی بھی تجھ سے معافی چاہتا ہوں، میں اس سے توبہ کرتا ہوں اور کفر، شرک، جھوٹ، غیبت، بدعت، چغلی، بے حیائی، بہتان اور تمام گناہوں سے بیزاری کا اظہار کرتا ہوں، اور میں اسلام لایا اور کہتا ہوں کہ اللہ کے سوا کوئی معبود نہیں، محمدﷺ اللہ کے رسول ہیں۔'
+            }
+        ];
+
+        function renderKalimas() {
+            const wrap = document.getElementById('kalimaList');
+            wrap.innerHTML = '';
+            kalimas.forEach((k, i) => {
+                const div = document.createElement('div');
+                div.className = 'kalima-item';
+                div.innerHTML = `
+                    <div class="item-title">
+                        <span class="item-name">${k.name}</span>
+                        <span class="item-badge">${i + 1}</span>
+                    </div>
+                    <div class="arabic-line">${k.arabic}</div>
+                    <div class="translation-line">${k.translation}</div>
+                `;
+                wrap.appendChild(div);
+            });
+        }
+
+        // ---------------- نماز کا طریقہ (فقہ حنفی) ----------------
+        const namazSteps = [
+            { title: 'طہارت (پاکیزگی)', desc: 'نماز سے پہلے بدن، کپڑے اور جائے نماز کا پاک ہونا اور باوضو ہونا ضروری ہے۔ اگر غسل کی حاجت ہو تو غسل کریں۔' },
+            { title: 'استقبالِ قبلہ', desc: 'قبلہ رخ (خانہ کعبہ کی سمت) کھڑے ہوں اور دل میں نیت کریں کہ فلاں نماز، فلاں وقت کی، اللہ کی رضا کے لیے پڑھ رہا ہوں۔' },
+            { title: 'تکبیرِ تحریمہ', desc: 'دونوں ہاتھ کانوں تک اٹھا کر "اللہ اکبر" کہیں اور ہاتھ باندھ لیں (مرد ناف کے نیچے، عورت سینے پر) - اس کے ساتھ ہی نماز شروع ہو جاتی ہے اور دنیاوی باتیں حرام ہو جاتی ہیں۔' },
+            { title: 'ثنا، تعوذ اور تسمیہ', desc: 'ثنا (سُبْحَانَكَ اللَّهُمَّ...) پڑھیں، پھر تعوذ (أَعُوذُ بِاللَّهِ...) اور تسمیہ (بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ) آہستہ آواز میں پڑھیں۔' },
+            { title: 'قرأت - سورۃ الفاتحہ اور ملانا', desc: 'سورۃ الفاتحہ مکمل پڑھیں، پھر کوئی بھی سورت یا کم از کم تین آیات ملائیں (پہلی اور دوسری رکعت میں)۔' },
+            { title: 'رکوع', desc: '"اللہ اکبر" کہتے ہوئے جھکیں، دونوں ہاتھوں سے گھٹنے پکڑیں، پیٹھ سیدھی رکھیں اور کم از کم تین بار "سُبْحَانَ رَبِّيَ الْعَظِيمِ" کہیں۔' },
+            { title: 'قومہ (رکوع سے اٹھنا)', desc: 'سیدھے کھڑے ہو کر "سَمِعَ اللَّهُ لِمَنْ حَمِدَهُ" اور پھر "رَبَّنَا لَكَ الْحَمْدُ" کہیں۔' },
+            { title: 'سجدہ', desc: '"اللہ اکبر" کہتے ہوئے سجدے میں جائیں (پہلے گھٹنے، پھر ہاتھ، پھر ناک اور پیشانی زمین پر رکھیں) اور کم از کم تین بار "سُبْحَانَ رَبِّيَ الْأَعْلَىٰ" کہیں۔' },
+            { title: 'جلسہ (دو سجدوں کے درمیان بیٹھنا)', desc: '"اللہ اکبر" کہتے ہوئے سیدھے بیٹھ جائیں، پھر دوبارہ "اللہ اکبر" کہتے ہوئے دوسرا سجدہ کریں - اس طرح ایک رکعت مکمل ہوتی ہے۔' },
+            { title: 'دوسری رکعت اور باقی رکعات', desc: 'کھڑے ہو کر دوسری رکعت اسی ترتیب سے ادا کریں (قرأت، رکوع، سجدے)۔ دو رکعت والی نماز میں دوسری رکعت کے دوسرے سجدے کے بعد بیٹھ جائیں۔' },
+            { title: 'قعدہ اور تشہد', desc: 'التحیات (اَلتَّحِيَّاتُ لِلَّهِ...) بیٹھ کر پڑھیں - "أَشْهَدُ أَنْ لَا إِلَٰهَ" پر شہادت کی انگلی سے اشارہ کریں۔ اگر یہ آخری رکعت ہے تو درود شریف اور دعا بھی پڑھیں، ورنہ کھڑے ہو کر باقی رکعتیں مکمل کریں۔' },
+            { title: 'درود اور دعا (آخری قعدہ)', desc: 'تشہد کے بعد درود ابراہیمی (اَللَّهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ...) اور کوئی مسنون دعا (رَبَّنَا آتِنَا... یا اَللَّهُمَّ إِنِّي ظَلَمْتُ...) پڑھیں۔' },
+            { title: 'سلام پھیرنا', desc: 'پہلے دائیں طرف چہرہ پھیر کر "اَلسَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ" کہیں، پھر بائیں طرف بھی یہی کہیں - نماز اس طرح مکمل ہو جاتی ہے۔' }
+        ];
+
+        function renderNamazSteps() {
+            const wrap = document.getElementById('namazSteps');
+            wrap.innerHTML = '';
+            namazSteps.forEach(s => {
+                const div = document.createElement('div');
+                div.className = 'namaz-step';
+                div.innerHTML = `<div class="step-title">${s.title}</div><div class="translation-line">${s.desc}</div>`;
+                wrap.appendChild(div);
+            });
+        }
+
+        // ---------------- 40 احادیث ----------------
+        const ahadees = [
+            { ar: 'إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ', ur: 'بے شک تمام اعمال کا دارومدار نیتوں پر ہے، اور ہر شخص کو وہی ملے گا جس کی اس نے نیت کی۔' },
+            { ar: 'الدِّينُ النَّصِيحَةُ', ur: 'دین سراسر خیرخواہی کا نام ہے - اللہ کے لیے، اس کی کتاب کے لیے، اس کے رسولﷺ کے لیے، مسلمانوں کے رہنماؤں کے لیے اور عام مسلمانوں کے لیے۔' },
+            { ar: 'مَنْ حُسْنِ إِسْلَامِ الْمَرْءِ تَرْكُهُ مَا لَا يَعْنِيهِ', ur: 'آدمی کے اچھے مسلمان ہونے کی علامت یہ ہے کہ وہ بے فائدہ باتوں کو چھوڑ دے۔' },
+            { ar: 'لَا يُؤْمِنُ أَحَدُكُمْ حَتَّىٰ يُحِبَّ لِأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ', ur: 'تم میں سے کوئی شخص اس وقت تک مکمل مومن نہیں ہو سکتا جب تک وہ اپنے بھائی کے لیے وہی پسند نہ کرے جو اپنے لیے پسند کرتا ہے۔' },
+            { ar: 'الْمُسْلِمُ مَنْ سَلِمَ الْمُسْلِمُونَ مِنْ لِسَانِهِ وَيَدِهِ', ur: 'مسلمان وہ ہے جس کی زبان اور ہاتھ سے دوسرے مسلمان محفوظ رہیں۔' },
+            { ar: 'الطُّهُورُ شَطْرُ الْإِيمَانِ', ur: 'پاکیزگی ایمان کا آدھا حصہ ہے۔' },
+            { ar: 'الْكَلِمَةُ الطَّيِّبَةُ صَدَقَةٌ', ur: 'اچھی اور بھلی بات کہنا بھی صدقہ ہے۔' },
+            { ar: 'مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الْآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ', ur: 'جو اللہ اور آخرت کے دن پر ایمان رکھتا ہے اسے چاہیے کہ اچھی بات کہے یا خاموش رہے۔' },
+            { ar: 'مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الْآخِرِ فَلْيُكْرِمْ ضَيْفَهُ', ur: 'جو اللہ اور آخرت کے دن پر ایمان رکھتا ہے اسے چاہیے کہ اپنے مہمان کی عزت کرے۔' },
+            { ar: 'مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الْآخِرِ فَلْيُكْرِمْ جَارَهُ', ur: 'جو اللہ اور آخرت کے دن پر ایمان رکھتا ہے اسے چاہیے کہ اپنے پڑوسی کی عزت کرے۔' },
+            { ar: 'خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ', ur: 'تم میں سب سے بہتر وہ شخص ہے جو قرآن سیکھے اور دوسروں کو سکھائے۔' },
+            { ar: 'بَلِّغُوا عَنِّي وَلَوْ آيَةً', ur: 'مجھ سے (دین کی بات) پہنچاؤ، خواہ ایک ہی آیت ہو۔' },
+            { ar: 'طَلَبُ الْعِلْمِ فَرِيضَةٌ عَلَىٰ كُلِّ مُسْلِمٍ', ur: 'علم حاصل کرنا ہر مسلمان مرد و عورت پر فرض ہے۔' },
+            { ar: 'مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَىٰ الْجَنَّةِ', ur: 'جو شخص علم حاصل کرنے کے لیے کسی راستے پر چلے، اللہ اس کے لیے جنت کا راستہ آسان فرما دیتا ہے۔' },
+            { ar: 'الرَّاحِمُونَ يَرْحَمُهُمُ الرَّحْمَٰنُ', ur: 'رحم کرنے والوں پر رحمان (اللہ) رحم فرماتا ہے، تم زمین والوں پر رحم کرو، آسمان والا تم پر رحم کرے گا۔' },
+            { ar: 'لَا يَدْخُلُ الْجَنَّةَ مَنْ لَا يَأْمَنُ جَارُهُ بَوَائِقَهُ', ur: 'جنت میں وہ شخص داخل نہیں ہوگا جس کا پڑوسی اس کی ایذاؤں سے محفوظ نہ ہو۔' },
+            { ar: 'أَحَبُّ النَّاسِ إِلَىٰ اللَّهِ أَنْفَعُهُمْ لِلنَّاسِ', ur: 'اللہ کے نزدیک لوگوں میں سب سے محبوب وہ ہے جو دوسروں کو سب سے زیادہ نفع پہنچانے والا ہو۔' },
+            { ar: 'مَنْ لَا يَرْحَمِ النَّاسَ لَا يَرْحَمْهُ اللَّهُ', ur: 'جو لوگوں پر رحم نہیں کرتا اللہ اس پر رحم نہیں فرماتا۔' },
+            { ar: 'الْمُؤْمِنُ الْقَوِيُّ خَيْرٌ وَأَحَبُّ إِلَىٰ اللَّهِ مِنَ الْمُؤْمِنِ الضَّعِيفِ', ur: 'طاقتور مومن، اللہ کے نزدیک کمزور مومن سے بہتر اور زیادہ محبوب ہے، اور دونوں میں خیر ہے۔' },
+            { ar: 'إِنَّ اللَّهَ رَفِيقٌ يُحِبُّ الرِّفْقَ فِي الْأَمْرِ كُلِّهِ', ur: 'اللہ نرمی کرنے والا ہے اور ہر معاملے میں نرمی کو پسند فرماتا ہے۔' },
+            { ar: 'مَنْ يُرِدِ اللَّهُ بِهِ خَيْرًا يُفَقِّهْهُ فِي الدِّينِ', ur: 'اللہ جس کے ساتھ بھلائی کا ارادہ فرماتا ہے اسے دین کی سمجھ عطا فرما دیتا ہے۔' },
+            { ar: 'الدُّنْيَا سِجْنُ الْمُؤْمِنِ وَجَنَّةُ الْكَافِرِ', ur: 'دنیا مومن کے لیے قید خانہ ہے اور کافر کے لیے جنت ہے۔' },
+            { ar: 'مَنْ لَمْ يَشْكُرِ النَّاسَ لَمْ يَشْكُرِ اللَّهَ', ur: 'جو لوگوں کا شکر ادا نہیں کرتا وہ اللہ کا بھی شکر ادا نہیں کرتا۔' },
+            { ar: 'إِنَّ مِنْ أَحَبِّكُمْ إِلَيَّ وَأَقْرَبِكُمْ مِنِّي مَجْلِسًا يَوْمَ الْقِيَامَةِ أَحَاسِنَكُمْ أَخْلَاقًا', ur: 'تم میں سے مجھے سب سے زیادہ محبوب اور قیامت کے دن مجھ سے قریب ترین وہ لوگ ہوں گے جو اخلاق میں سب سے اچھے ہوں گے۔' },
+            { ar: 'مَا نَقَصَتْ صَدَقَةٌ مِنْ مَالٍ', ur: 'صدقہ دینے سے مال میں کمی نہیں ہوتی۔' },
+            { ar: 'الْمُؤْمِنُ لِلْمُؤْمِنِ كَالْبُنْيَانِ يَشُدُّ بَعْضُهُ بَعْضًا', ur: 'ایک مومن دوسرے مومن کے لیے ایک عمارت کی مانند ہے جس کا ایک حصہ دوسرے حصے کو مضبوط کرتا ہے۔' },
+            { ar: 'مَثَلُ الْمُؤْمِنِينَ فِي تَوَادِّهِمْ وَتَرَاحُمِهِمْ كَمَثَلِ الْجَسَدِ', ur: 'مومنوں کی مثال آپس کی محبت اور رحم دلی میں ایک جسم کی طرح ہے، جب اس کا کوئی عضو تکلیف میں ہو تو سارا جسم بخار اور بے خوابی میں مبتلا ہو جاتا ہے۔' },
+            { ar: 'خَيْرُ النَّاسِ أَنْفَعُهُمْ لِلنَّاسِ', ur: 'بہترین لوگ وہ ہیں جو دوسروں کے لیے سب سے زیادہ نفع بخش ہوں۔' },
+            { ar: 'إِيَّاكُمْ وَالظَّنَّ فَإِنَّ الظَّنَّ أَكْذَبُ الْحَدِيثِ', ur: 'بدگمانی سے بچو، کیونکہ بدگمانی سب سے جھوٹی بات ہے۔' },
+            { ar: 'لَا تَحَاسَدُوا وَلَا تَبَاغَضُوا وَلَا تَدَابَرُوا وَكُونُوا عِبَادَ اللَّهِ إِخْوَانًا', ur: 'آپس میں حسد نہ کرو، بغض نہ رکھو، ایک دوسرے سے منہ نہ موڑو، بلکہ اللہ کے بندے اور آپس میں بھائی بھائی بن کر رہو۔' },
+            { ar: 'مَنْ سَتَرَ مُسْلِمًا سَتَرَهُ اللَّهُ فِي الدُّنْيَا وَالْآخِرَةِ', ur: 'جو کسی مسلمان کی پردہ پوشی کرتا ہے، اللہ دنیا و آخرت میں اس کی پردہ پوشی فرماتا ہے۔' },
+            { ar: 'وَاللَّهُ فِي عَوْنِ الْعَبْدِ مَا كَانَ الْعَبْدُ فِي عَوْنِ أَخِيهِ', ur: 'اللہ اس بندے کی مدد فرماتا رہتا ہے جب تک وہ بندہ اپنے بھائی کی مدد میں لگا رہتا ہے۔' },
+            { ar: 'مَنْ صَمَتَ نَجَا', ur: 'جس نے زبان کو قابو میں رکھا وہ (فتنوں سے) نجات پا گیا۔' },
+            { ar: 'إِنَّ اللَّهَ لَا يَنْظُرُ إِلَىٰ صُوَرِكُمْ وَأَمْوَالِكُمْ وَلَكِنْ يَنْظُرُ إِلَىٰ قُلُوبِكُمْ وَأَعْمَالِكُمْ', ur: 'اللہ تمہاری صورتوں اور مالوں کو نہیں دیکھتا بلکہ تمہارے دلوں اور اعمال کو دیکھتا ہے۔' },
+            { ar: 'الْحَيَاءُ مِنَ الْإِيمَانِ', ur: 'حیا ایمان کا حصہ ہے۔' },
+            { ar: 'الظُّلْمُ ظُلُمَاتٌ يَوْمَ الْقِيَامَةِ', ur: 'ظلم قیامت کے دن (ظالم کے لیے) اندھیروں کا باعث ہوگا۔' },
+            { ar: 'مَنْ حَسُنَ إِسْلَامُ الْمَرْءِ لَا يُجَازَىٰ بِسَيِّئَتِهِ إِلَّا بِمِثْلِهَا', ur: 'جس کا اسلام اچھا ہو جائے، اس کی برائی کا بدلہ صرف اتنا ہی لیا جاتا ہے جتنی برائی ہو۔' },
+            { ar: 'رِفْقًا بِالْقَوَارِيرِ', ur: 'شیشے (یعنی نازک دلوں، خصوصاً عورتوں) کے ساتھ نرمی برتو۔' },
+            { ar: 'خَيْرُكُمْ خَيْرُكُمْ لِأَهْلِهِ', ur: 'تم میں سب سے بہتر وہ ہے جو اپنے گھر والوں کے ساتھ سب سے بہتر ہو۔' },
+            { ar: 'مَنْ عَادَ مَرِيضًا خَاضَ فِي الرَّحْمَةِ حَتَّىٰ يَجْلِسَ', ur: 'جو کسی مریض کی عیادت کرتا ہے وہ رحمت میں ڈوبا رہتا ہے یہاں تک کہ وہ بیٹھ جائے۔' },
+            { ar: 'الْجَنَّةُ تَحْتَ أَقْدَامِ الْأُمَّهَاتِ', ur: 'جنت ماؤں کے قدموں تلے ہے۔' }
+        ];
+
+        function renderAhadees() {
+            const wrap = document.getElementById('hadeesList');
+            wrap.innerHTML = '';
+            ahadees.forEach((h, i) => {
+                const div = document.createElement('div');
+                div.className = 'hadees-item';
+                div.innerHTML = `
+                    <div class="item-title">
+                        <span class="item-name">حدیث نمبر ${i + 1}</span>
+                        <span class="item-badge">${i + 1}</span>
+                    </div>
+                    <div class="arabic-line">${h.ar}</div>
+                    <div class="translation-line">${h.ur}</div>
+                `;
+                wrap.appendChild(div);
+            });
+        }
+
+        // Init
+        setLang('ur');
+        loadSurahList();
+        renderKalimas();
+        renderNamazSteps();
+        renderAhadees();
+    </script>
+</body>
+</html>
